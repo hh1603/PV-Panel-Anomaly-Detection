@@ -1,0 +1,74 @@
+﻿modality_routes:
+  visible:
+    train: visible_detector_boosted
+    predict: visible_detector_boosted
+  infrared:
+    train: infrared_classifier
+    predict: infrared_classifier
+
+pipelines:
+  visible_detector:
+    modality: visible
+    task: detect
+    description: Original visible-light defect detector baseline using converted dataset_1 annotations.
+    data: configs/dataset_1_defect.yaml
+    default_train:
+      model: yolov8n.pt
+      epochs: 12
+      imgsz: 256
+      batch: 1
+      workers: 0
+      patience: 8
+      project: runs/train
+      name: visible_detector_baseline
+    default_predict:
+      weights: runs/train/visible_detector_baseline_cpu/weights/best.pt
+      conf: 0.25
+      imgsz: 256
+      project: runs/predict
+      name: visible_detector_predict
+  visible_detector_boosted:
+    modality: visible
+    task: detect
+    description: Recommended visible-light defect detector using repeated positive samples plus tuned demo-time postprocess.
+    data: configs/dataset_1_defect_boosted.yaml
+    default_train:
+      model: yolov8n.pt
+      epochs: 12
+      imgsz: 320
+      batch: 1
+      workers: 0
+      patience: 8
+      project: runs/train
+      name: visible_detector_boosted_baseline
+    default_predict:
+      weights: runs/train/visible_detector_v2/weights/best.pt
+      conf: 0.001
+      imgsz: 416
+      project: runs/predict
+      name: visible_detector_boosted_predict
+    detect_postprocess:
+      confidence: 0.15
+      min_area_ratio: 0.003
+      max_area_ratio: 0.03
+      max_detections: 1
+  infrared_classifier:
+    modality: infrared
+    task: classify
+    description: Infrared hotspot severity classification using the prepared IR multiclass dataset.
+    data: datasets/classification_ready/ir_multiclass
+    default_train:
+      model: yolov8n-cls.pt
+      epochs: 12
+      imgsz: 224
+      batch: 16
+      workers: 0
+      patience: 8
+      project: runs/cls
+      name: infrared_classifier_baseline
+    default_predict:
+      weights: runs/cls/infrared_classifier_baseline/weights/best.pt
+      imgsz: 224
+      topk: 3
+      project: runs/cls_predict
+      name: infrared_classifier_predict

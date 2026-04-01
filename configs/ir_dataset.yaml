@@ -1,0 +1,9 @@
+﻿path: datasets/ir
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: hotspot
+  1: crack
+  2: breakage
+  3: stain
